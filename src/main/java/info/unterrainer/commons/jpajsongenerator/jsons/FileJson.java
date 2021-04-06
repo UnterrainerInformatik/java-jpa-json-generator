@@ -11,6 +11,6 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode()
 public class FileJson {
 
-	private String name;
+	private String table;
 	private FieldJson[] fields;
 }

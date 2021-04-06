@@ -1,6 +1,7 @@
 package info.unterrainer.commons.jpajsongenerator.jsons;
 
 import info.unterrainer.commons.jpajsongenerator.enums.AccessModifier;
+import info.unterrainer.commons.jpajsongenerator.enums.Subtype;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ public class FieldJson {
 	private String[] comment;
 	private AccessModifier accessModifier;
 	private GeneralType type;
+	private Subtype subType;
 	private String name;
 	private String jsonProperty;
 }
