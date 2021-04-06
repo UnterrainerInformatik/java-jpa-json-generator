@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+	    <groupId>info.unterrainer.commons</groupId>
+	    <artifactId>parent-pom</artifactId>
+	    <version>0.1.5</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jpa-json-generator</artifactId>
+	<version>0.0.1</version>
+	<name>JpaJsonGenerator</name>
+	<packaging>jar</packaging>
+
+	<properties>
+		<name>Jpa-Json-Generator</name>
+		<package-path>info/unterrainer/commons/jpajsongenerator</package-path>
+		<packg-string>info.unterrainer.commons.jpajsongenerator</packg-string>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>info.unterrainer.commons</groupId>
+			<artifactId>cli-utils</artifactId>
+			<version>0.2.9</version>
+		</dependency>
+		<dependency>
+			<groupId>info.unterrainer.commons</groupId>
+			<artifactId>serialization</artifactId>
+			<version>0.1.2</version>
+		</dependency>
+	</dependencies>
+	
+</project>
