@@ -1,100 +1,167 @@
 package info.unterrainer.commons.jpajsongenerator;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 import info.unterrainer.commons.cliutils.Arg;
 import info.unterrainer.commons.cliutils.Cli;
 import info.unterrainer.commons.cliutils.CliParser;
-import info.unterrainer.commons.cliutils.Flag;
+import info.unterrainer.commons.jpajsongenerator.enums.TargetType;
+import info.unterrainer.commons.jpajsongenerator.jsons.ConfigJson;
+import info.unterrainer.commons.jpajsongenerator.jsons.ConversionJson;
+import info.unterrainer.commons.jpajsongenerator.jsons.FileJson;
+import info.unterrainer.commons.jreutils.Resources;
+import info.unterrainer.commons.serialization.JsonMapper;
+import info.unterrainer.commons.serialization.exceptions.JsonMappingException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JpaJsonGenerator {
 
-	private class LongOpt {
-		public static final String SERVER = "server";
-		public static final String USER = "user";
-		public static final String PASSWORD = "password";
-		public static final String LIST = "list";
-		public static final String READ = "read";
-		public static final String OUTPUT = "output";
-		public static final String ROOT_NODE = "rootnode";
-		public static final String RECURSIVE = "recursive";
-		public static final String SUBSCRIPTION = "subscription";
-		public static final String SECONDS = "seconds";
-	}
+	private static JsonMapper jsonMapper = JsonMapper.create();
 
-	protected static final String SERVER = "opc.tcp://192.168.251.16:4980/Honeywell-OPCUA";
-	protected static final String USER = "rsgroup";
-	protected static final String PASSWORD = "R+SGroup2017";
+	private class LongOpt {
+		public static final String CONFIG = "config";
+		public static final String CONVERSION = "conversion";
+	}
 
 	public static void main(final String[] args) {
 		Cli cli = CliParser
-				.cliFor(args, "OpcUaBrowser", "a small tool to help validate a few theories concerning OPC-UA")
-				.addArg(Arg.String(LongOpt.SERVER)
-						.shortName("s")
-						.description("the server instance to connect to (opc.tcp://<ip>.<port>/name)")
-						.defaultValue(SERVER))
-				.addArg(Arg.String(LongOpt.USER)
-						.shortName("u")
-						.description("the user to use when connecting to the server")
-						.defaultValue(USER))
-				.addArg(Arg.String(LongOpt.PASSWORD)
-						.shortName("p")
-						.description("the password used when connecting to the server")
-						.defaultValue(PASSWORD))
-				.addFlag(Flag.builder(LongOpt.LIST)
-						.shortName("l")
-						.description("browses and lists all nodes of this server instance"))
-				.addArg(Arg.String(LongOpt.ROOT_NODE)
-						.description("the root node id to start browsing with (for -l option). "
-								+ "The global root-node if string is not parseable or omitted"))
-				.addFlag(Flag.builder(LongOpt.RECURSIVE).shortName("R").description("browse the nodes recursively"))
-				.addArg(Arg.String(LongOpt.OUTPUT)
-						.shortName("o")
+				.cliFor(args, "JpaJsonGenerator", "a tool to generate JPA-DTOs for JAVA and JSON-DTOs for JAVA and C#")
+				.addArg(Arg.String(LongOpt.CONFIG)
+						.shortName("f")
 						.description(
-								"use to specifiy a file that the output will be saved to (overwrites file if already present)"))
-				.addArg(Arg.String(LongOpt.READ)
-						.shortName("r")
-						.description("use to read the values (double) of the provided node-ids")
-						.unlimited())
-				.addArg(Arg.String(LongOpt.SUBSCRIPTION)
-						.description("make a subscription for nodeId=ARGS and run it for 10 (or <duration>) seconds")
-						.unlimited())
-				.addArg(Arg.Integer(LongOpt.SECONDS)
-						.description("if you make a subscription, this overrides the 10 seconds duration")
-						.defaultValue(10)
+								"the path to the config-file to use (default is 'config.json' at program location)")
+						.defaultValue("config.json")
 						.optional())
-				.addMinRequired(1, LongOpt.LIST, LongOpt.READ, LongOpt.SUBSCRIPTION)
+				.addArg(Arg.String(LongOpt.CONVERSION)
+						.shortName("c")
+						.description(
+								"the conversion-step to do (one of JAVA_JPA, JAVA_JSON or C_SHARP_JSON) (default is all defined in the config)")
+						.optional())
 				.create();
 		if (cli.isHelpSet())
 			System.exit(0);
-		String endpointUrl = cli.getArgValue(LongOpt.SERVER);
-		String user = cli.getArgValue(LongOpt.USER);
-		String password = cli.getArgValue(LongOpt.PASSWORD);
 
-		// start browsing at root folder
-		if (cli.isFlagSet(LongOpt.LIST)) {
-			log.info("flag '{}' is set", LongOpt.LIST);
+		String configPath = cli.getArgValue(LongOpt.CONFIG);
+		ConfigJson config = null;
+		try {
+			String configString = Resources.readResource(JpaJsonGenerator.class, configPath);
+			config = jsonMapper.fromStringTo(ConfigJson.class, configString);
+		} catch (IOException e1) {
+			log.error("Could not find/read config-file [{}]", configPath);
+			System.exit(1);
+		} catch (JsonMappingException me) {
+			log.error("Error parsing config-file.", me);
+			System.exit(1);
+		}
 
-			if (cli.isArgSet(LongOpt.ROOT_NODE)) {
-				String nodeId = cli.getArgValue(LongOpt.ROOT_NODE);
-				log.info("arg '{}' is set to [{}]", LongOpt.ROOT_NODE, nodeId);
+		String conv = cli.getArgValue(LongOpt.CONVERSION);
+		TargetType targetType = null;
+		try {
+			if (conv != null)
+				targetType = TargetType.valueOf(conv);
+		} catch (IllegalArgumentException e) {
+			log.error("[{}] is not a valid value for conversion-type. Use one of [{}]", conv, String.join(",",
+					Arrays.stream(TargetType.values()).map(TargetType::toString).toArray(size -> new String[size])));
+			System.exit(1);
+		}
+
+		for (ConversionJson conversion : config.getConversions()) {
+			getSourcePath(conversion);
+			Path targetPath = getTargetPath(conversion);
+
+			if (targetType == null || targetType.equals(conversion.getTargetType()))
+				convert(config, conversion, targetPath, targetType);
+		}
+	}
+
+	private static Path getSourcePath(final ConversionJson conversion) {
+		Path path = null;
+		try {
+			path = Path.of(conversion.getSourceDir());
+		} catch (InvalidPathException e) {
+			log.error("SourcePath was invalid.", e);
+			System.exit(1);
+		}
+		if (!Files.exists(path)) {
+			log.error("Source-directory [{}] specified in conversion of type [{}] does not exist.",
+					conversion.getSourceDir(), conversion.getTargetType());
+			System.exit(1);
+		}
+		return path;
+	}
+
+	private static Path getTargetPath(final ConversionJson conversion) {
+		Path path = Path.of("");
+		if (conversion.getTargetDir() != null) {
+			try {
+				path = Path.of(conversion.getTargetDir());
+			} catch (InvalidPathException e) {
+				log.error("TargetPath was invalid.", e);
+				System.exit(1);
+			}
+			try {
+				Files.createDirectories(path);
+			} catch (Exception e) {
+				log.error("TargetPath could not be created.", e);
+				System.exit(1);
+			}
+		}
+		return path;
+	}
+
+	private static void convert(final ConfigJson config, final ConversionJson conversion, final Path targetPath,
+			final TargetType targetType) {
+		for (Path path : getFileList(conversion.getSourceDir())) {
+			String source = null;
+			FileJson sourceJson = null;
+			try {
+				source = Resources.readResource(JpaJsonGenerator.class, path.toString());
+				sourceJson = jsonMapper.fromStringTo(FileJson.class, source);
+			} catch (IOException e) {
+				log.error("Error reading input-file.", e);
+				System.exit(1);
+			} catch (JsonMappingException me) {
+				log.error("Error parsing input-file.", me);
+				System.exit(1);
 			}
 
-			if (cli.isArgSet(LongOpt.OUTPUT)) {
-				String file = cli.getArgValue(LongOpt.OUTPUT);
-				log.info("Writing output JSON file to [{}]", file);
+			String result = convertFile(config, conversion, targetType, sourceJson);
+			try {
+				Files.write(targetPath.resolve(path.getFileName().toString() + "." + targetType.getFileEnding()),
+						result.getBytes(StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				log.error("Error writing generated file.", e);
+				System.exit(1);
 			}
 		}
-		if (cli.isFlagSet(LongOpt.READ)) {
-			log.info("Reading values from given nodes");
-			List<String> readIds = cli.getArgValues(LongOpt.READ);
+	}
+
+	private static String comment(final String[] comment, final TargetType targetType) {
+		return "";
+	}
+
+	private static String convertFile(final ConfigJson config, final ConversionJson conversion,
+			final TargetType targetType, final FileJson source) {
+		String r = "";
+
+		return r;
+	}
+
+	private static List<Path> getFileList(final String path) {
+		try {
+			return Resources.walk(JpaJsonGenerator.class, path,
+					f -> f.getFileName().toString().toLowerCase().endsWith(".json"));
+		} catch (IOException e) {
+			log.error("Error reading input files.", e);
+			System.exit(1);
 		}
-		if (cli.isArgSet(LongOpt.SUBSCRIPTION)) {
-			log.info("Testing subscription with given nodes");
-			List<String> subscriptionIds = cli.getArgValues(LongOpt.SUBSCRIPTION);
-			int seconds = cli.getArgValue(LongOpt.SECONDS);
-		}
+		return null;
 	}
 }

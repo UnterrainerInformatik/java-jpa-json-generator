@@ -12,5 +12,7 @@ import lombok.experimental.SuperBuilder;
 public class FileJson {
 
 	private String table;
+	private GeneralType extend;
+	private GeneralType[] implement;
 	private FieldJson[] fields;
 }

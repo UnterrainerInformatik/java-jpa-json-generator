@@ -12,6 +12,5 @@ import lombok.experimental.SuperBuilder;
 public class ConfigJson {
 
 	private String[] header;
-	private String sourceDir;
 	private ConversionJson[] conversions;
 }

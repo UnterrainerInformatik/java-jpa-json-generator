@@ -30,11 +30,11 @@
         "    // *** Change the file-description in the generator-project instead.       ***",
         "    // ***************************************************************************"
     ],
-    "sourceDir": "",
     "conversions": [
         {
-            "targetType": "JAVA",
-            "targetDir": "",
+            "targetType": "JAVA_JSON",
+            "sourceDir": "sourceFiles",
+            "targetDir": "sourceFiles",
             "namespace": "info.unterrainer.commons.jpajsongenerator.jsons",
             "classAnnotations": [
                 {
@@ -54,57 +54,48 @@
                     "fqn": "lombok.EqualsAndHashCode"
                 }
             ],
-            "extend": [
-                {
-                    "name": "BasicJson",
-                    "fqn": "info.unterrainer.commons.serialization.jsons.BasicJson"
-                }
-            ],
+            "extend": {
+                "name": "BasicJson",
+                "fqn": "info.unterrainer.commons.serialization.jsons.BasicJson"
+            },
             "implement": []
         },
         {
-            "targetType": "C_SHARP",
-            "targetDir": "",
+            "targetType": "JAVA_JSON",
+            "sourceDir": "sourceFiles",
+            "targetDir": "sourceFiles",
+            "namespace": "info.unterrainer.commons.jpajsongenerator.jsons",
+            "classAnnotations": [
+                {
+                    "name": "@Data",
+                    "fqn": "lombok.Data"
+                },
+                {
+                    "name": "@NoArgsConstructor",
+                    "fqn": "lombok.NoArgsConstructor"
+                },
+                {
+                    "name": "@SuperBuilder(toBuilder = true)",
+                    "fqn": "lombok.experimental.SuperBuilder"
+                },
+                {
+                    "name": "@EqualsAndHashCode(callSuper = true)",
+                    "fqn": "lombok.EqualsAndHashCode"
+                }
+            ],
+            "extend": {
+                "name": "BasicJson",
+                "fqn": "info.unterrainer.commons.serialization.jsons.BasicJson"
+            },
+            "implement": []
+        },
+        {
+            "targetType": "C_SHARP_JSON",
+            "sourceDir": "sourceFiles",
+            "targetDir": "sourceFiles",
             "namespace": "MyStromRestApiCSharp.DTOs",
             "classAnnotations": [],
-            "extend": [],
             "implement": []
-        }
-    ],
-    "files": [
-        {
-            "name": "AlarmEmailTagJson",
-            "fields": [
-                {
-                    "comment": [
-                        "The ID of the alarm-email."
-                    ],
-                    "accessModifier": "private",
-                    "type": {
-                        "name": "LONG"
-                    },
-                    "name": "alarmEmailId"
-                },
-                {
-                    "accessModifier": "private",
-                    "type": {
-                        "name": "LONG"
-                    },
-                    "name": "tagId"
-                },
-                {
-                    "comment": [
-                        "The severity of the alarm in question."
-                    ],
-                    "accessModifier": "private",
-                    "type": {
-                        "name": "AlarmSeverity",
-                        "fqn": "at.elitezettl.server.eliteserver.enums.AlarmSeverity"
-                    },
-                    "jsonProperty": "the-severity",
-                    "name": "onSeverity"
-                }
-            ]
         }
     ]
 }
