@@ -19,4 +19,5 @@ public class FieldJson {
 	private SubType subType;
 	private String name;
 	private String jsonProperty;
+	private Boolean deprecated;
 }

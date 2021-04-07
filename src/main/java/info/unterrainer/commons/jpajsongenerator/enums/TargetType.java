@@ -24,4 +24,12 @@ public enum TargetType {
 		this.commentBeginLine = commentBeginLine;
 		this.commentEnd = commentEnd;
 	}
+
+	public boolean isJava() {
+		return this != C_SHARP_JSON;
+	}
+
+	public boolean isJpa() {
+		return this == JAVA_JPA;
+	}
 }
