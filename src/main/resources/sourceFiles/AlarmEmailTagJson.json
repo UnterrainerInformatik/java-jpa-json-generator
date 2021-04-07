@@ -1,0 +1,35 @@
+{
+    "table": "alarmEmailTag",
+    "fields": [
+        {
+            "comment": [
+                "The ID of the alarm-email."
+            ],
+            "accessModifier": "private",
+            "type": {
+                "name": "LONG"
+            },
+            "name": "alarmEmailId"
+        },
+        {
+            "accessModifier": "private",
+            "type": {
+                "name": "LONG"
+            },
+            "name": "tagId"
+        },
+        {
+            "comment": [
+                "The severity of the alarm in question."
+            ],
+            "accessModifier": "private",
+            "subType": "ENUM",
+            "type": {
+                "name": "AlarmSeverity",
+                "fqn": "at.elitezettl.server.eliteserver.enums.AlarmSeverity"
+            },
+            "jsonProperty": "the-severity",
+            "name": "onSeverity"
+        }
+    ]
+}

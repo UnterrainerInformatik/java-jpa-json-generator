@@ -1,41 +1,42 @@
 package info.unterrainer.commons.jpajsongenerator.enums;
 
-import java.util.HashMap;
-import java.util.Map;
+import info.unterrainer.commons.jpajsongenerator.jsons.GeneralType;
+import lombok.Getter;
 
 public enum BasicType {
 
-	LONG("Long", "long"),
-	FLOAT("Float", "float"),
-	DOUBLE("Double", "double"),
-	INT("Integer", "int"),
-	STRING("String", "string"),
-	DATETIME("LocalDateTime", "DateTime"),
-	BOOL("Boolean", "bool");
+	LONG("Long", "long", "Long", new GeneralType[] {}, new GeneralType[] {}, new GeneralType[] {}),
+	FLOAT("Float", "float", "Float", new GeneralType[] {}, new GeneralType[] {}, new GeneralType[] {}),
+	DOUBLE("Double", "double", "Double", new GeneralType[] {}, new GeneralType[] {}, new GeneralType[] {}),
+	INT("Integer", "int", "Integer", new GeneralType[] {}, new GeneralType[] {}, new GeneralType[] {}),
+	STRING("String", "string", "String", new GeneralType[] {}, new GeneralType[] {}, new GeneralType[] {}),
+	DATETIME("LocalDateTime", "DateTime", "LocalDateTime", new GeneralType[] {}, new GeneralType[] {},
+			new GeneralType[] { GeneralType.builder()
+					.name("@Enumerated(EnumType.STRING)")
+					.fqn("javax.persistence.Enumerated")
+					.build(), GeneralType.builder().fqn("javax.persistence.EnumType").build() }),
+	BOOL("Boolean", "bool", "Boolean", new GeneralType[] {}, new GeneralType[] {}, new GeneralType[] {});
 
-	private static final Map<String, BasicType> BY_JAVA_VALUE = new HashMap<>();
-	private static final Map<String, BasicType> BY_C_SHARP_VALUE = new HashMap<>();
+	@Getter
+	private final String javaValue;
+	@Getter
+	private final String cSharpValue;
+	@Getter
+	private final String jpaValue;
+	@Getter
+	private final GeneralType[] javaTypes;
+	@Getter
+	private final GeneralType[] cSharpTypes;
+	@Getter
+	private final GeneralType[] jpaTypes;
 
-	static {
-		for (BasicType e : values())
-			BY_JAVA_VALUE.put(e.javaValue, e);
-		for (BasicType e : values())
-			BY_C_SHARP_VALUE.put(e.cSharpValue, e);
-	}
-
-	public final String javaValue;
-	public final String cSharpValue;
-
-	private BasicType(final String javaValue, final String cSharpValue) {
+	private BasicType(final String javaValue, final String cSharpValue, final String jpaValue,
+			final GeneralType[] javaTypes, final GeneralType[] cSharpTypes, final GeneralType[] jpaTypes) {
 		this.javaValue = javaValue;
 		this.cSharpValue = cSharpValue;
-	}
-
-	public static BasicType ofJavaValue(final String javaValue) {
-		return BY_JAVA_VALUE.get(javaValue);
-	}
-
-	public static BasicType ofCSharpValue(final String cSharpValue) {
-		return BY_C_SHARP_VALUE.get(cSharpValue);
+		this.jpaValue = jpaValue;
+		this.javaTypes = javaTypes;
+		this.cSharpTypes = cSharpTypes;
+		this.jpaTypes = jpaTypes;
 	}
 }
