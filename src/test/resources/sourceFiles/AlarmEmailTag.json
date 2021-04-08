@@ -5,24 +5,40 @@
             "comment": [
                 "The ID of the alarm-email."
             ],
-            "accessModifier": "private",
+            "accessModifier": "PRIVATE",
             "type": {
                 "name": "LONG"
             },
             "name": "alarmEmailId"
         },
         {
-            "accessModifier": "private",
+            "accessModifier": "PRIVATE",
             "type": {
                 "name": "LONG"
             },
             "name": "tagId"
         },
         {
+            "accessModifier": "PRIVATE",
+            "type": {
+                "name": "LONG"
+            },
+            "name": "tagIds",
+            "subType": "LIST"
+        },
+        {
+            "accessModifier": "PRIVATE",
+            "type": {
+                "name": "LONG"
+            },
+            "name": "alarmIds",
+            "subType": "ARRAY"
+        },
+        {
             "comment": [
                 "The severity of the alarm in question."
             ],
-            "accessModifier": "private",
+            "accessModifier": "PRIVATE",
             "subType": "ENUM",
             "type": {
                 "name": "AlarmSeverity",
