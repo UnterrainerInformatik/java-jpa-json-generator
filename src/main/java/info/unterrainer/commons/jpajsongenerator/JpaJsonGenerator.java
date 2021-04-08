@@ -13,6 +13,7 @@ import java.util.Set;
 import info.unterrainer.commons.cliutils.Arg;
 import info.unterrainer.commons.cliutils.Cli;
 import info.unterrainer.commons.cliutils.CliParser;
+import info.unterrainer.commons.jpajsongenerator.enums.SubType;
 import info.unterrainer.commons.jpajsongenerator.enums.TargetType;
 import info.unterrainer.commons.jpajsongenerator.jsons.ConfigJson;
 import info.unterrainer.commons.jpajsongenerator.jsons.ConversionJson;
@@ -264,14 +265,18 @@ public class JpaJsonGenerator {
 
 	private static String getFieldAnnotations(final FieldJson field, final TargetType targetType) {
 		StringBuilder sb = new StringBuilder();
-		if (field.get)
-			return sb.toString();
-	}
-
-	private static String getField(final FieldJson field, final TargetType targetType) {
-		StringBuilder sb = new StringBuilder();
 		if (field.getJsonProperty() != null)
 			if (targetType.isJava()) {
+				if (field.getType().getName().equalsIgnoreCase("localdatetime") && targetType.isJpa()) {
+					sb.append("\t");
+					sb.append("@Convert(converter = LocalDateTimeConverter.class)");
+					sb.append(newLine);
+				}
+				if (field.getSubType() != null && field.getSubType() == SubType.ENUM && targetType.isJpa()) {
+					sb.append("\t");
+					sb.append("@Convert(converter = LocalDateTimeConverter.class)");
+					sb.append(newLine);
+				}
 				sb.append("\t");
 				sb.append("@JsonProperty(\"");
 				sb.append(field.getJsonProperty());
@@ -294,6 +299,32 @@ public class JpaJsonGenerator {
 					sb.append(newLine);
 				}
 			}
+		return sb.toString();
+	}
+
+	private static String getField(final FieldJson field, final TargetType targetType) {
+		StringBuilder sb = new StringBuilder();
+		if (targetType.isJava()) {
+			sb.append("\t");
+			sb.append(field.getAccessModifier());
+			sb.append(" ");
+			sb.append(field.getType());
+			sb.append(" ");
+			sb.append(field.getName());
+			sb.append(";");
+			sb.append(newLine);
+
+		} else {
+			sb.append("\t\t");
+			sb.append(field.getAccessModifier());
+			sb.append(" ");
+			if (field.getSubType() != null && field.getSubType() == SubType.ENUM)
+				sb.append(field.getType());
+			sb.append(" ");
+			sb.append(field.getName());
+			sb.append("  { get; set; }");
+			sb.append(newLine);
+		}
 		return sb.toString();
 	}
 
