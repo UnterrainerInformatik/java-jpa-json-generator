@@ -1,6 +1,6 @@
 package info.unterrainer.commons.jpajsongenerator.enums;
 
-public enum Subtype {
+public enum SubType {
 
 	LIST,
 	ARRAY,

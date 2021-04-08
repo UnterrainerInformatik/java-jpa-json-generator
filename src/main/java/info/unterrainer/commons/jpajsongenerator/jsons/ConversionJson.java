@@ -13,9 +13,10 @@ import lombok.experimental.SuperBuilder;
 public class ConversionJson {
 
 	private TargetType targetType;
+	private String sourceDir;
 	private String targetDir;
 	private String namespace;
 	private GeneralType[] classAnnotations;
-	private GeneralType[] extend;
+	private GeneralType extend;
 	private GeneralType[] implement;
 }

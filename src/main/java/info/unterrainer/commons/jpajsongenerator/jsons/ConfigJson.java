@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode()
 public class ConfigJson {
 
+	private String newLine;
 	private String[] header;
-	private String sourceDir;
 	private ConversionJson[] conversions;
 }
